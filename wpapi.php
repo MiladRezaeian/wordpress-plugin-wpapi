@@ -106,7 +106,9 @@ final class WpApi {
 	 * @return void
 	 */
 	public function subscribe_activation() {
-
+		if( ! wp_next_scheduled( 'wpvip_optimize_db' ) ){
+			wp_schedule_event( time(), 'daily', 'wpvip_optimize_db' );
+		}
 	}
 
 	/**
