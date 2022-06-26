@@ -92,7 +92,10 @@ final class WpApi {
 			$class           = $query->query_vars['class'];
 			$method          = $query->query_vars['method'];
 			$full_class_path = "\\App\\" . $version . "Controllers" . "\\" . ucfirst( $class ) . 'sController';
-			new $full_class_path;
+			$target_class    = new $full_class_path;
+			if ( method_exists( $target_class, $method )){
+				$target_clas = {$method}();
+			}
 			exit();
 		}
 	}

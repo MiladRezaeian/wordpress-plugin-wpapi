@@ -1,20 +1,23 @@
 <?php
 
-namespace App\V1\Controllers;
-use App\Repositories\User;
-use App\Utility\Response;
+	namespace App\V1\Controllers;
 
-class UserController {
+	use App\Repositories\User;
+	use App\Utility\Response;
 
-	protected $user_repository;
+	class UserController
+	{
 
-	public function __construct() {
-		$this->user_repository = new namespace\UserRepository();
-	}
+		protected $user_repository;
 
-	public function details(  ) {
+		public function __construct()
+		{
+			$this->user_repository = new namespace\UserRepository();
+		}
+
+	public function details() {
 		$user = $this->user_repository->find(1);
         Response::json( $user );
 	}
 
-}
+	}

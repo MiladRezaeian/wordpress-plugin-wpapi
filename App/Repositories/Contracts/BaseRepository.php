@@ -10,6 +10,7 @@ abstract class BaseRepository
     protected $per_page;
     protected $db;
     protected $table_prefix;
+	protected $guarded;
 
     public function __construct() {
         global $wpdb;
@@ -19,12 +20,12 @@ abstract class BaseRepository
 
     public function find( $id, $columns = null ) {
         $columns = $this->columns($columns);
-
-        return $this->db->get_row($this->db->prepare("
+		$user = $this->db->get_row($this->db->prepare("
 			SELECT {$columns}
 			FROM {$this->table}
 			WHERE {$this->primary_key} = %d
 		"), $id);
+		return $user = $this->apply_guard( $user );
     }
 
     public function findBy( $criteria = array(), $columns = null, $single_record = false ) {
@@ -57,5 +58,17 @@ abstract class BaseRepository
 
         return $query;
     }
+
+	protected function apply_guard($user)	{
+		$raw_data = (array)$user;
+		foreach ( $raw_data as $key=>$value ){
+			if( in_array( $key, $this->guarded)){
+				unset($raw_data[$key]);
+			}
+		}
+
+		return $raw_data;
+//		return array_diff( $raw_data, $this->guarded );
+	}
 
 }
