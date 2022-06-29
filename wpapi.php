@@ -2,14 +2,15 @@
 
 /** Plugin Name: WP-API ... */
 
-Subscribe::check_direct_access();
+WpApi::check_direct_access();
 
 final class WpApi {
-	protected static $_instance;
 
-	public static function getInstance() {
+	private static $_instance;
+
+	public static function get_instance() {
 		if ( is_null( self::$_instance ) ) {
-			self::$_instance = new static;
+			self::$_instance = new self();
 		}
 	}
 
@@ -36,8 +37,11 @@ final class WpApi {
 	 * @return void
 	 */
 	private function do_includes() {
-		if ( $this->is_request( 'admin' ) ) {
-			include SUBSCRIBE_DIR . 'inc' . DS . 'admin' . DS . 'class-admin.php';
+		if ( $this->is_request( 'frontend' ) ) {
+			include WPAPI_DIR . DS . 'App' . DS . 'Repositories' . DS . 'Contracts' . DS . 'BaseRepository.php';
+			include WPAPI_DIR . DS . 'App' . DS . 'Repositories' . DS . 'User' . DS . 'UserRepository.php';
+			include WPAPI_DIR . DS . 'App' . DS . 'Utility' . DS . 'Response.php';
+			include WPAPI_DIR . DS . 'App' . DS . 'v1' . DS . 'Controllers' . DS . 'UsersController.php';
 		}
 	}
 
@@ -52,32 +56,30 @@ final class WpApi {
 		switch ( $type ) {
 			case 'admin':
 				return is_admin();
-				break;
 			case 'ajax':
 				return defined( 'DOING_AJAX' );
-				break;
 			case 'frontend':
 				return ! is_admin();
-				break;
 		}
 	}
 
-	private function init() {
+	private function init() : void {
+		register_activation_hook( __FILE__, array( $this, 'wpapi_activation' ) );
+		register_deactivation_hook( __FILE__, array( $this, 'wpapi_deactivation' ) );
+
 		add_action( 'init', [ $this, 'register_routes' ] );
 		add_filter( 'query_vars', [ $this, 'register_query_vars' ] );
 		add_action( 'parse_request', [ $this, 'parse_request' ] );
-		register_activation_hook( __FILE__, array( $this, 'subscribe_activation' ) );
-		register_deactivation_hook( __FILE__, array( $this, 'subscribe_deactivation' ) );
+
 	}
 
-	private function register_routes() {
+	public function register_routes() : void {
 		add_rewrite_rule( '^api\/([\w0-9]+)\/([\w]+)\/([\w]+)',
 			'index.php?api=1&version=$matches[1]&class=$matches[2]&method=$matches[3]',
 			'top' );
-		flush_rewrite_rules();
 	}
 
-	public function register_query_vars( $vars ) {
+	public function register_query_vars( $vars ): array {
 		$vars[] = 'api';
 		$vars[] = 'version';
 		$vars[] = 'class';
@@ -86,13 +88,17 @@ final class WpApi {
 		return $vars;
 	}
 
-	public function parse_request( $query ) {
+	public function parse_request( $query ) : void {
 		if ( isset( $query->query_vars['api'] ) && intval( $query->query_vars['api'] == 1 ) ) {
 			$version         = $query->query_vars['version'];
 			$class           = $query->query_vars['class'];
 			$method          = $query->query_vars['method'];
-			$full_class_path = "\\App\\" . $version . "Controllers" . "\\" . ucfirst( $class ) . 'sController';
-			new $full_class_path;
+			$full_class_path = "\\App\\" . $version . DS . "Controllers" . "\\" . ucfirst( $class ) . 'sController';
+			$target_class    = new $full_class_path;
+			if ( method_exists( $target_class, $method ) ) {
+				$target_class->{$method}();
+			}
+
 			exit();
 		}
 	}
@@ -102,8 +108,8 @@ final class WpApi {
 	 *
 	 * @return void
 	 */
-	public function subscribe_activation() {
-
+	public function wpapi_activation() : void {
+		flush_rewrite_rules();
 	}
 
 	/**
@@ -111,7 +117,7 @@ final class WpApi {
 	 *
 	 * @return void
 	 */
-	public function subscribe_deactivation() {
+	public function wpapi_deactivation() : void {
 
 	}
 
@@ -120,10 +126,10 @@ final class WpApi {
 	 *
 	 * @return void
 	 */
-	public static function check_direct_access() {
+	public static function check_direct_access() : void {
 		defined( 'ABSPATH' ) || exit( 'NO ACCESS!!!' );
 	}
 
 }
 
-WpApi::getInstance();
+WpApi::get_instance();

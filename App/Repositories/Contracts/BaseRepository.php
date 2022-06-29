@@ -24,7 +24,7 @@ abstract class BaseRepository
 			SELECT {$columns}
 			FROM {$this->table}
 			WHERE {$this->primary_key} = %d
-		"), $id);
+		", $id));
     }
 
     public function findBy( $criteria = array(), $columns = null, $single_record = false ) {

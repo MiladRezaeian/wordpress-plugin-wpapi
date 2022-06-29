@@ -1,6 +1,8 @@
 <?php
 
-use App\Repositories\Contracts;
+namespace App\Repositories\User;
+
+use App\Repositories\Contracts\BaseRepository;
 
 class UserRepository extends BaseRepository {
 
