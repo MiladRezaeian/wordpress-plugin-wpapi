@@ -10,6 +10,7 @@ class UserRepository extends BaseRepository {
         parent::__construct();
         $this->table = $this->db->users;
         $this->primary_key = 'ID';
+		$this->guarded = [ 'user_pass'];
     }
 
 }

@@ -108,8 +108,11 @@ final class WpApi {
 	 *
 	 * @return void
 	 */
-	public function wpapi_activation() : void {
-		flush_rewrite_rules();
+	public function subscribe_activation() {
+	flush_rewrite_rules();
+		if( ! wp_next_scheduled( 'wpvip_optimize_db' ) ){
+			wp_schedule_event( time(), 'daily', 'wpvip_optimize_db' );
+		}
 	}
 
 	/**
