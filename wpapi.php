@@ -63,7 +63,7 @@ final class WpApi {
 		}
 	}
 
-	private function init() : void {
+	private function init(): void {
 		register_activation_hook( __FILE__, array( $this, 'wpapi_activation' ) );
 		register_deactivation_hook( __FILE__, array( $this, 'wpapi_deactivation' ) );
 
@@ -73,10 +73,11 @@ final class WpApi {
 
 	}
 
-	public function register_routes() : void {
+	public function register_routes(): void {
 		add_rewrite_rule( '^api\/([\w0-9]+)\/([\w]+)\/([\w]+)',
 			'index.php?api=1&version=$matches[1]&class=$matches[2]&method=$matches[3]',
 			'top' );
+		flush_rewrite_rules();
 	}
 
 	public function register_query_vars( $vars ): array {
@@ -88,7 +89,7 @@ final class WpApi {
 		return $vars;
 	}
 
-	public function parse_request( $query ) : void {
+	public function parse_request( $query ): void {
 		if ( isset( $query->query_vars['api'] ) && intval( $query->query_vars['api'] == 1 ) ) {
 			$version         = $query->query_vars['version'];
 			$class           = $query->query_vars['class'];
@@ -108,9 +109,8 @@ final class WpApi {
 	 *
 	 * @return void
 	 */
-	public function subscribe_activation() {
-	flush_rewrite_rules();
-		if( ! wp_next_scheduled( 'wpvip_optimize_db' ) ){
+	public function wpapi_activation(): void {
+		if ( ! wp_next_scheduled( 'wpvip_optimize_db' ) ) {
 			wp_schedule_event( time(), 'daily', 'wpvip_optimize_db' );
 		}
 	}
@@ -120,7 +120,7 @@ final class WpApi {
 	 *
 	 * @return void
 	 */
-	public function wpapi_deactivation() : void {
+	public function wpapi_deactivation(): void {
 
 	}
 
@@ -129,7 +129,7 @@ final class WpApi {
 	 *
 	 * @return void
 	 */
-	public static function check_direct_access() : void {
+	public static function check_direct_access(): void {
 		defined( 'ABSPATH' ) || exit( 'NO ACCESS!!!' );
 	}
 

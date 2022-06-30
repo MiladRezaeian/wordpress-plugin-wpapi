@@ -1,6 +1,6 @@
 <?php
 
-namespace App\V1\Controllers;
+namespace App\v1\Controllers;
 
 use App\Repositories\User\UserRepository;
 use App\Utility\Response;
